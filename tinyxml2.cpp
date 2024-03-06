@@ -2336,6 +2336,22 @@ static FILE* callfopen( const char* filepath, const char* mode )
     return fp;
 }
 
+static FILE* callfopen( const wchar_t* filepath, const wchar_t* mode )
+{
+    TIXMLASSERT( filepath );
+    TIXMLASSERT( mode );
+#if defined(_MSC_VER) && (_MSC_VER >= 1400 ) && (!defined WINCE)
+    FILE* fp = 0;
+    const errno_t err = _wfopen_s( &fp, filepath, mode );
+    if ( err ) {
+        return 0;
+    }
+#else
+    FILE* fp = wfopen( filepath, mode );
+#endif
+    return fp;
+}
+
 void XMLDocument::DeleteNode( XMLNode* node )	{
     TIXMLASSERT( node );
     TIXMLASSERT(node->_document == this );
@@ -2364,6 +2380,25 @@ XMLError XMLDocument::LoadFile( const char* filename )
 
     Clear();
     FILE* fp = callfopen( filename, "rb" );
+    if ( !fp ) {
+        SetError( XML_ERROR_FILE_NOT_FOUND, 0, "filename=%s", filename );
+        return _errorID;
+    }
+    LoadFile( fp );
+    fclose( fp );
+    return _errorID;
+}
+
+XMLError XMLDocument::LoadFile( const wchar_t* filename )
+{
+    if ( !filename ) {
+        TIXMLASSERT( false );
+        SetError( XML_ERROR_FILE_COULD_NOT_BE_OPENED, 0, "filename=<null>" );
+        return _errorID;
+    }
+
+    Clear();
+    FILE* fp = callfopen( filename, L"rb" );
     if ( !fp ) {
         SetError( XML_ERROR_FILE_NOT_FOUND, 0, "filename=%s", filename );
         return _errorID;
@@ -2436,6 +2471,25 @@ XMLError XMLDocument::SaveFile( const char* filename, bool compact )
     }
 
     FILE* fp = callfopen( filename, "w" );
+    if ( !fp ) {
+        SetError( XML_ERROR_FILE_COULD_NOT_BE_OPENED, 0, "filename=%s", filename );
+        return _errorID;
+    }
+    SaveFile(fp, compact);
+    fclose( fp );
+    return _errorID;
+}
+
+
+XMLError XMLDocument::SaveFile( const wchar_t* filename, bool compact )
+{
+    if ( !filename ) {
+        TIXMLASSERT( false );
+        SetError( XML_ERROR_FILE_COULD_NOT_BE_OPENED, 0, "filename=<null>" );
+        return _errorID;
+    }
+
+    FILE* fp = callfopen( filename, L"w" );
     if ( !fp ) {
         SetError( XML_ERROR_FILE_COULD_NOT_BE_OPENED, 0, "filename=%s", filename );
         return _errorID;

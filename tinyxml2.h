@@ -1761,6 +1761,14 @@ public:
     XMLError LoadFile( const char* filename );
 
     /**
+    	Windows Unicode ver.
+        Load an XML file from disk.
+    	Returns XML_SUCCESS (0) on success, or
+    	an errorID.
+    */
+    XMLError LoadFile( const wchar_t* filename );
+
+    /**
     	Load an XML file from disk. You are responsible
     	for providing and closing the FILE*.
 
@@ -1779,6 +1787,14 @@ public:
     	an errorID.
     */
     XMLError SaveFile( const char* filename, bool compact = false );
+
+    /**
+    	Windows Unicode ver.
+        Save the XML file to disk.
+    	Returns XML_SUCCESS (0) on success, or
+    	an errorID.
+    */
+    XMLError SaveFile( const wchar_t* filename, bool compact = false );
 
     /**
     	Save the XML file to disk. You are responsible
